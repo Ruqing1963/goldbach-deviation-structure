@@ -1,0 +1,251 @@
+\documentclass[10pt,twocolumn]{article}
+
+% 页面设置
+\usepackage[margin=0.75in,top=0.8in,bottom=0.8in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{float}
+
+% 紧凑设置
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{1em}
+\setlength{\columnsep}{0.25in}
+\titlespacing*{\section}{0pt}{1.5ex plus 0.5ex minus 0.2ex}{0.8ex plus 0.2ex}
+\titlespacing*{\subsection}{0pt}{1.2ex plus 0.3ex minus 0.2ex}{0.5ex plus 0.1ex}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\setlist{nosep,leftmargin=1.5em}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+\setlength{\abovedisplayskip}{6pt}
+\setlength{\belowdisplayskip}{6pt}
+
+\begin{document}
+
+% ============================================================
+% 标题区
+% ============================================================
+\begin{center}
+{\Large\bfseries Fractal-Spectral Structure of Goldbach Deviations:}\\[0.3em]
+{\Large\bfseries Long-Range Persistence and Amplitude Scaling}\\[1em]
+{\normalsize Ruqing Chen}\\[0.3em]
+{\small GUT Geoservice Inc., Montreal}\\
+{\small\texttt{ruqing@hotmail.com}}\\[0.2em]
+{\small Data \& Code: \texttt{github.com/Ruqing1963/goldbach-deviation-structure}}\\[0.5em]
+{\small January 2026}\\[0.3em]
+\end{center}
+
+\vspace{0.5em}
+% ============================================================
+% 摘要
+% ============================================================
+\noindent\textbf{Abstract.} 
+We investigate the structural properties of Goldbach deviations $\delta(N) = (G(N)-HL(N))/HL(N)$, where $G(N)$ is the Goldbach representation count and $HL(N)$ the Hardy-Littlewood prediction. Three principal findings emerge: (1) \textbf{Scale Separation}: the main term grows as $N$ while the error grows as $\sqrt{N}$, ensuring asymptotic dominance; (2) \textbf{Long-Range Persistence}: the Hurst exponent $H=0.84\gg0.5$ indicates strong non-random structure; (3) \textbf{Self-Similar Amplitude Scaling}: the envelope coefficient $\kappa\approx C_2=0.6602$ (twin prime constant) is stable across four orders of magnitude. These observations suggest that Goldbach deviations are governed by structured, arithmetically-driven dynamics rather than stochastic fluctuations. While not constituting a rigorous proof, these findings provide strong heuristic evidence for the structural stability of positive Goldbach counts at large $N$.\\[0.3em]
+\noindent\textbf{Keywords:} Goldbach Conjecture, Hurst Exponent, Long-Range Dependence, L-function Zeros, Experimental Mathematics
+\vspace{0.8em}
+
+\section{Introduction}
+
+Goldbach's Conjecture (1742) states that every even integer $N>2$ can be expressed as the sum of two primes. Despite computational verification up to $4\times10^{18}$ \cite{oliveira2013}, a rigorous proof remains elusive.
+
+Previous approaches have focused on deriving analytical bounds for the error term in the Hardy-Littlewood asymptotic formula. In this paper, we take a complementary approach: rather than seeking sharper bounds, we analyze the \emph{global structural behavior} of Goldbach deviations using tools from fractal geometry and spectral analysis.
+
+Our investigation reveals three previously unrecognized structural features:
+\begin{enumerate}[nosep]
+\item The deviation exhibits \textbf{long-range persistence} ($H=0.84$), inconsistent with random-walk behavior;
+\item The amplitude follows \textbf{self-similar scaling} controlled by the twin prime constant $C_2$;
+\item FFT analysis detects \textbf{characteristic frequencies} matching known L-function zeros.
+\end{enumerate}
+
+These findings do not constitute a proof of Goldbach's Conjecture, but they illuminate the underlying structure and suggest why no counterexample has been observed and why the deviation appears structurally constrained.
+
+\section{Mathematical Framework}
+
+\subsection{Hardy-Littlewood Decomposition}
+
+Let $G(N)$ denote the number of representations of even $N$ as a sum of two primes. The Hardy-Littlewood conjecture \cite{hardy1923} predicts:
+\begin{equation}
+G(N) \sim \frac{2C_2 S(N) N}{(\ln N)^2} \equiv HL(N)
+\end{equation}
+where $C_2 = 0.6601618158...$ is the twin prime constant. We define the \emph{relative deviation}:
+\begin{equation}
+\delta(N) = \frac{G(N) - HL(N)}{HL(N)}
+\end{equation}
+The conjecture $G(N)>0$ is equivalent to $\delta(N)>-1$.
+
+\subsection{Scale Separation}
+
+Under the Generalized Riemann Hypothesis (GRH), the absolute error satisfies $\Delta(N) = O(\sqrt{N}(\ln N)^k)$. Since $HL(N)\sim N/(\ln N)^2$:
+\begin{equation}
+\delta(N) \sim \frac{(\ln N)^{k+2}}{\sqrt{N}} \to 0 \quad \text{as } N\to\infty
+\end{equation}
+This \emph{scale separation} implies that the relative deviation vanishes asymptotically.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{fig4_scale_separation.png}
+\caption{Scale separation. (A) Main term $S\sim N$ versus error $\Delta\sim\sqrt{N}$. Inset: local fluctuations at $N\sim10^6$ showing structured oscillations. (B) Relative deviation decays as $N^{-1/2}$.}
+\label{fig:scale}
+\end{figure}
+
+\section{Observation I: Long-Range Persistence}
+
+\subsection{Hurst Exponent Analysis}
+
+The Hurst exponent $H$ \cite{hurst1951} characterizes the long-range dependence structure of a time series. For Brownian motion (random walk), $H=0.5$; for persistent (trending) series, $H>0.5$.
+
+We computed $H$ for the Goldbach deviation sequence using the Rescaled Range (R/S) method over $N\in[10^3, 5\times10^5]$:
+\begin{equation}
+\boxed{H = 0.84 \pm 0.03}
+\end{equation}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{fig2_hurst_analysis.png}
+\caption{(A) Goldbach deviation series $\delta(N)$. (B) R/S analysis yielding $H=0.84$, significantly exceeding the random-walk value of 0.5.}
+\label{fig:hurst}
+\end{figure}
+
+\textbf{Interpretation}: The high Hurst exponent indicates that $\delta(N)$ exhibits \emph{long-range persistence}---successive values are positively correlated across large scales. This is inconsistent with independent random fluctuations. (We note that alternative estimators such as Detrended Fluctuation Analysis yield consistent values of $H$ within error bars; a detailed methodological comparison will be reported elsewhere.)
+
+\textbf{Caveat}: A high $H$ value does not logically exclude the existence of counterexamples. It indicates that if a counterexample exists, it must arise from a mechanism that violates the observed long-range correlation structure---a scenario that appears highly unlikely in a heuristic sense. (Here ``highly unlikely'' is used informally; no probability measure on the space of deviations is rigorously defined.)
+
+\subsection{Spectral Evidence: L-Function Zeros}
+
+Schematically, and suppressing smoothing and truncation terms, the explicit formula relates the deviation to L-function zeros:
+\begin{equation}
+\delta(N) \sim \sum_\gamma \frac{A_\gamma \cos(\gamma\ln N + \phi_\gamma)}{\ln N}
+\end{equation}
+FFT analysis of $\delta(N)$ reveals spectral peaks at frequencies consistent with known zeros:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{fig3_fft_spectrum.png}
+\caption{FFT spectrum showing peaks near $\gamma\approx 6.02, 8.04, 14.13$, corresponding to imaginary parts of L-function zeros.}
+\label{fig:fft}
+\end{figure}
+
+This provides strong evidence that a significant component of the deviation is a structured, arithmetically-driven oscillation associated with L-function zeros, rather than purely stochastic noise.
+
+\section{Observation II: Self-Similar Amplitude Scaling}
+
+\subsection{The Twin Prime Constant Connection}
+
+We measured the effective envelope coefficient $\kappa$ defined by fitting $|\delta(N)|_{\max} \approx \kappa/\ln N$ across different scales:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{ccc}
+\toprule
+$N$ range & $\kappa$ (fitted) & $\kappa/C_2$ \\
+\midrule
+$10^3$--$10^4$ & $0.69\pm0.05$ & $1.04$ \\
+$10^4$--$10^5$ & $0.71\pm0.04$ & $1.07$ \\
+$10^5$--$10^6$ & $0.68\pm0.03$ & $1.03$ \\
+$10^6$--$10^7$ & $0.67\pm0.03$ & $1.01$ \\
+\bottomrule
+\end{tabular}
+\caption{Fitted envelope coefficient $\kappa$ compared to $C_2=0.6602$.}
+\label{tab:kappa}
+\end{table}
+
+\textbf{Observation}: The ratio $\kappa/C_2$ remains close to unity across four orders of magnitude, suggesting a fundamental connection between deviation amplitude and the twin prime constant.
+
+\textbf{Conjecture}: We hypothesize that:
+\begin{equation}
+|\delta(N)| \lesssim \frac{C_2}{\ln N} + O\left(\frac{1}{(\ln N)^2}\right)
+\label{eq:conjecture}
+\end{equation}
+This is an \emph{empirical observation}, not a theorem. Rigorous derivation from the circle method remains an open problem.
+
+\subsection{Asymptotic Stability Margin}
+
+If Conjecture~(\ref{eq:conjecture}) holds, the ``stability margin'' $1-C_2/\ln N$ satisfies:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{cc}
+\toprule
+$N$ & Stability Margin \\
+\midrule
+$10^6$ & $0.952$ \\
+$10^{12}$ & $0.976$ \\
+$10^{100}$ & $0.997$ \\
+\bottomrule
+\end{tabular}
+\caption{Extrapolated stability margin under Conjecture~(\ref{eq:conjecture}).}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{fig1_safety_gap.png}
+\caption{Asymptotic stability diagram. Green: empirical envelope $\pm C_2/\ln N$. Red: failure threshold $\delta=-1$. Blue: simulated deviations. The gap between envelope and threshold widens with $N$.}
+\label{fig:stability}
+\end{figure}
+
+\section{Discussion}
+
+\subsection{Nature of the Evidence}
+
+We emphasize the distinction between our findings and a mathematical proof:
+
+\begin{itemize}[nosep]
+\item \textbf{Hurst analysis} provides \emph{statistical} evidence for non-random structure, but does not logically exclude rare deviations.
+\item \textbf{Amplitude scaling} ($\kappa\approx C_2$) is an \emph{empirical observation}, not derived from first principles.
+\item \textbf{Scale separation} is conditional on GRH, itself unproven.
+\end{itemize}
+
+Our results are best characterized as \emph{strong heuristic evidence} for the structural stability of positive Goldbach counts.
+
+\subsection{Relation to Classical Approaches}
+
+Our approach complements classical circle-method error analyses by focusing not on sharper bounds, but on the global structural behavior of deviations. While traditional methods ask ``how large can the error be?'', we ask ``what is the qualitative character of the error?'' The answer---structured, persistent, arithmetically-driven---suggests that the error is not adversarial but structurally compatible with the main term.
+
+\subsection{Physical Interpretation}
+
+The observed structures admit a physical interpretation (offered here as heuristic imagery, not mathematical assertion):
+
+The Goldbach deviation behaves like a \emph{damped oscillator} driven by L-function zeros. The persistence ($H\approx0.84$) reflects the quasi-periodic nature of this driving. The amplitude scaling ($\kappa\approx C_2$) suggests the main term and error share a common arithmetic origin---both are controlled by the same fundamental constants.
+
+
+\subsection{Open Problems}
+
+\begin{enumerate}[nosep]
+\item Derive the bound $|\delta|\lesssim C_2/\ln N$ from the circle method.
+\item Explain the origin of $\kappa\approx C_2$ from singular series structure.
+\item Extend Hurst analysis to $N>10^{10}$ using distributed computation.
+\end{enumerate}
+
+\section{Conclusion}
+
+We have identified three structural features of Goldbach deviations:
+\begin{enumerate}[nosep]
+\item \textbf{Long-Range Persistence}: $H=0.84$ indicates non-random, structured dynamics.
+\item \textbf{Self-Similar Amplitude}: $\kappa\approx C_2$ suggests a deep connection to twin prime arithmetic.
+\item \textbf{Spectral Signature}: FFT peaks match L-function zeros.
+\end{enumerate}
+
+These findings provide \textbf{strong heuristic evidence} that the Goldbach deviation is structurally constrained. Converting these observations into a rigorous proof remains an important open challenge for analytic number theory.
+
+\vspace{0.5em}
+\begin{center}
+\emph{``The deviation is not noise---it can be viewed as a structured signal,\\governed by the zeros of L-functions,\\with long-range persistence and self-similar scaling.''}
+\end{center}
+
+\begin{thebibliography}{7}
+\bibitem{hardy1923} Hardy, G.H. and Littlewood, J.E. (1923). \emph{Acta Math.}, 44:1--70.
+\bibitem{hurst1951} Hurst, H.E. (1951). \emph{Trans. ASCE}, 116:770--799.
+\bibitem{gallagher1976} Gallagher, P.X. (1976). \emph{Mathematika}, 23:4--9.
+\bibitem{oliveira2013} Oliveira e Silva, T. et al. (2013). \emph{Math. Comp.}, 83:2033--2060.
+\bibitem{montgomery2007} Montgomery, H.L. and Vaughan, R.C. (2007). Cambridge Univ. Press.
+\bibitem{mandelbrot1982} Mandelbrot, B.B. (1982). \emph{The Fractal Geometry of Nature}. Freeman.
+\end{thebibliography}
+
+\end{document}
